@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this pipeline, please cite the software and the model documentation below."
+type: software
+title: "LUMEN-Crop: crosswalk and rescaling of Crop Allocation Model data to the LUMEN grid"
+version: "1.0.0"
+date-released: "2026-11-02"
+license: CC-BY-4.0
+repository-code: "https://github.com/IFPRI/LUMEN-Crop-P"
+authors:
+  - family-names: Mishra
+    given-names: Abhijeet
+    email: a.mishra@cgiar.org
+    affiliation: "International Food Policy Research Institute (IFPRI)"
+  - family-names: Petsakos
+    given-names: Athanasios
+    email: A.Petsakos@cgiar.org
+    affiliation: "Alliance of Bioversity International and the International Center for Tropical Agriculture (CIAT)"
+keywords:
+  - IMPACT model
+  - LUMEN
+  - land use
+  - downscaling
+  - crop allocation
+  - SPAM
+preferred-citation:
+  type: report
+  title: "Land Use Model with Environmental Nexus (LUMEN) and LUMEN-Crop: Model documentation"
+  year: 2026
+  institution:
+    name: "International Food Policy Research Institute (IFPRI)"
+    city: "Washington, DC"
+  authors:
+    - family-names: Mishra
+      given-names: Abhijeet
+    - family-names: Petsakos
+      given-names: Athanasios
+    - family-names: Cenacchi
+      given-names: Nicola
+    - family-names: Gabriel
+      given-names: Sherwin
+    - family-names: Hartley
+      given-names: Faaiqa
+    - family-names: Sulser
+      given-names: Timothy B.

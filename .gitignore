@@ -1,0 +1,10 @@
+# generated outputs: rerun run.bat to recreate
+output/
+# private inputs: the LUMEN solution and the Crop Allocation Model country files are never committed
+input/*.gdx
+!input/PIXEL_TO_DIM.gdx
+desktop.ini
+__pycache__/
+*.pyc
+*.lst
+*.log
