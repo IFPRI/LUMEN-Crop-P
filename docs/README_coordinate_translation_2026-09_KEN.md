@@ -1,3 +1,12 @@
+> **Status (November 2026).** This is the September 2026 working note, kept for the grid derivation and
+> the Kenya diagnostics. Its second part, *Rescaling AP's crop data onto LUMEN's cropland totals*, describes a
+> per-pid rescale that the pipeline no longer produces: it has been replaced by the RAS balance in
+> `src/step2_balance.gms`, which matches `lu_out` per pid **and** IMPACT's `AREACTYX0` per crop and system.
+> The "AP is 78 % of LUMEN" gap discussed below is real and has no basis explanation: AP's `p_Area` is SPAM's
+> *physical* area mapped to IMPACT crops (confirmed from AP's export code), so both sides are physical and SPAM
+> simply carries less cropland for Kenya than IMPACT's `LANDX0`. The RAS balance absorbs the gap; see the
+> top-level README. Symbol names in that part (`p_Area_rescaled`, `rescale_factor`, ...) no longer exist.
+
 # Translating AP's 5-arcmin `PIXEL_TO_DIM` grid into the LUMEN 0.25° `pid` grid
 
 ## Who owns what
@@ -178,8 +187,8 @@ and the crosswalk cannot resolve them:
   5,777 kha (AP) vs 7,250 kha (LUMEN 2021), i.e. AP is 78% of LUMEN.
 - **Multi-cropping works the other way.** If AP's `p_Area` were *harvested* area,
   double-cropped cells would push it *above* physical cropland — so multi-cropping does
-  not explain a shortfall, it deepens it. Whether `p_Area` is harvested or physical is
-  still worth confirming with AP, but it is not a candidate explanation for the gap.
+  not explain a shortfall, it deepens it. `p_Area` has since been confirmed to be *physical*
+  area (AP's export writes `p_MapPhysP`), so this is settled: not a candidate explanation.
 - **LUMEN itself undershoots its own target.** `lu_cty` KEN crop 2021 = 7,255 kha against
   an IMPACT control total of 7,396 kha; the 141 kha difference is model slack
   (`slack_check`). Compare against `lu_out`, as done here, not against `impact_base`.

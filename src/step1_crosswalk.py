@@ -2,13 +2,15 @@
 aggregate AP's per-pixel crop area and production onto that grid.
 
 Inputs
-  solution_lu.gdx   LUMEN: pid, pid_coords, pid_run, cty_run, yrs
+  solution_lu.gdx   LUMEN: pid, pid_coords, pid_run, pid_cty, cty_run, yrs, lu_out
   PIXEL_TO_DIM.gdx  AP master grid: every 5-arcmin pixel key -> (X, Y) centre
   AP_<cty>...gdx    AP downscale: PIXEL_TO_DIM (its own pixels), p_Area, p_Production
+  IMPACT scenario   AREACTYX0, CROPINTENSX0, LANDX0, YLDCTYX0 (read by impact_targets.py, step 1b)
 
 Outputs
   output/pixel5min_to_pid025.gdx                  the general, global crosswalk
   output/secondary/<cty>_crop_in_pid_coords.gdx   AP's crop data on the pid grid
+  output/secondary/<cty>_impact_targets.gdx       IMPACT country targets for cty_run (step 1b)
   output/secondary/crosswalk_*.csv                the same, for inspection
 
 Geometry (see docs/): both grids are cell-centre grids on the same origin and
@@ -81,9 +83,20 @@ def read_lumen(lu_path, gamsdir, log):
     pid_run = set(records(c["pid_run"], ["pid"]).pid)
     cty_run = sorted(records(c["cty_run"], ["cty"]).cty) if "cty_run" in c.listSymbols() else []
     yrs = sorted(records(c["yrs"], ["yrs"]).yrs, key=lambda s: int(s))
+    pid_cty = records(c["pid_cty"], ["pid", "cty"])
+    pid_cty = pid_cty[pid_cty.pid.isin(pid_run)]
+    if pid_cty.pid.duplicated().any():
+        raise PipelineError("solution_lu: a pid in pid_run belongs to more than one country in pid_cty")
+    if set(pid_cty.pid) != pid_run:
+        raise PipelineError("solution_lu: pid_run and pid_cty disagree on which pids are in the run")
+    # country crop totals of lu_out over pid_run, by year: what step 1b compares with IMPACT
+    lu = param3(c, "lu_out", ["pid", "fland", "yrs"])
+    lu = lu[(lu.fland == "crop") & lu.pid.isin(pid_run)].merge(pid_cty, on="pid")
+    lu_crop_cty = lu.groupby(["cty", "yrs"], as_index=False)["value"].sum()
     log(f"LUMEN  : {len(pids):,} pids in land mask, {len(pid_run):,} in pid_run, "
         f"cty_run = {cty_run}, years {yrs[0]}-{yrs[-1]}")
-    return dict(pids=pids, pidtab=pc, pid_run=pid_run, cty_run=cty_run, yrs=yrs)
+    return dict(pids=pids, pidtab=pc, pid_run=pid_run, cty_run=cty_run, yrs=yrs,
+                pid_cty=pid_cty, lu_crop_cty=lu_crop_cty)
 
 
 # ----------------------------------------------------------------------------- crosswalk
@@ -190,8 +203,9 @@ def write_crop_gdx(r, lumen, path, gamsdir):
     s_pid = gt.Set(m, "pid", records=lumen["pids"], description="LUMEN 0.25-deg pixel IDs")
     s_pix = gt.Set(m, "PIXEL_S", records=r["ap"].pixel.tolist(),
                    description="AP 5-arcmin pixel keys in this downscale file")
-    s_j = gt.Set(m, "JCROP", records=r["jcrop"], description="crops (IMPACT j-codes)")
-    s_s = gt.Set(m, "SYS", records=r["sys"], description="production system")
+    s_j = gt.Set(m, "JCROP", records=r["jcrop"],
+                 description="crops (IMPACT j-codes): IMPACT crops first, then crops only AP reports")
+    s_s = gt.Set(m, "SYS", records=r["sys"], description="production system (IR, RF, AGG = IR + RF)")
     s_co = gt.Set(m, "coord", records=["x", "y"], description="coordinate")
     gt.Set(m, "pid_used", domain=[s_pid], records=r["pid_used"],
            description="LUMEN pids carrying AP crop area")
@@ -222,7 +236,7 @@ def write_crop_gdx(r, lumen, path, gamsdir):
 
 
 # ----------------------------------------------------------------------------- entry
-def run(lu_path, pixel_path, ap_path, out_dir, sec_dir, gamsdir, log):
+def run(lu_path, pixel_path, ap_path, impact_path, out_dir, sec_dir, gamsdir, log):
     lumen = read_lumen(lu_path, gamsdir, log)
     cty = "_".join(lumen["cty_run"]) if lumen["cty_run"] else "ALL"
 
@@ -235,10 +249,26 @@ def run(lu_path, pixel_path, ap_path, out_dir, sec_dir, gamsdir, log):
     log(f"wrote  : {xw_gdx}")
 
     r = map_ap(ap_path, xw, lumen, gamsdir, log)
+
+    # ---- step 1b: IMPACT country targets. The crop list shared by both GDX files is the IMPACT
+    # crop order first, then any crop only AP reports, so step 2 can load both on one JCROP set.
+    import impact_targets as it
+    tg = it.extract(impact_path, lumen["cty_run"], lumen["yrs"], gamsdir, log)
+    j_imp = [j for j in tg["jorder"] if j in set(tg["area"].j)]
+    j_ap_only = [j for j in r["jcrop"] if j not in set(j_imp)]
+    j_imp_only = [j for j in j_imp if j not in set(r["jcrop"])]
+    r["jcrop"] = j_imp + j_ap_only
+    if j_ap_only or j_imp_only:
+        log(f"         crop lists differ: only in AP {j_ap_only or '-'}, only in IMPACT {j_imp_only or '-'}")
+    it.check_country_totals(tg, lumen["lu_crop_cty"], log)
+    targets_gdx = sec_dir / f"{cty}_impact_targets.gdx"
+    it.write_targets_gdx(tg, r["jcrop"], r["sys"], lumen["cty_run"], lumen["yrs"], targets_gdx, gamsdir)
+    log(f"wrote  : {targets_gdx}")
+
     crop_gdx = sec_dir / f"{cty}_crop_in_pid_coords.gdx"
     write_crop_gdx(r, lumen, crop_gdx, gamsdir)
     r["ap"].rename(columns={"pixel": "pixel_s", "x": "pixel_x", "y": "pixel_y"})[
         ["pixel_s", "pixel_x", "pixel_y", "cell_x", "cell_y", "pid"]
     ].to_csv(sec_dir / f"crosswalk_{cty}_pixels.csv", index=False)
     log(f"wrote  : {crop_gdx}")
-    return dict(cty=cty, yrs=lumen["yrs"], crop_gdx=crop_gdx, crosswalk_gdx=xw_gdx)
+    return dict(cty=cty, yrs=lumen["yrs"], crop_gdx=crop_gdx, targets_gdx=targets_gdx, crosswalk_gdx=xw_gdx)

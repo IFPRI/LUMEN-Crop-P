@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this pipeline, please cite the software and the model documentation below."
 type: software
-title: "LUMEN-Crop: crosswalk and rescaling of Crop Allocation Model data to the LUMEN grid"
+title: "LUMEN-Crop: crosswalk and balancing of Crop Allocation Model data to the LUMEN grid and IMPACT crop areas"
 version: "1.0.0"
 date-released: "2026-11-02"
 license: CC-BY-4.0
