@@ -13,7 +13,7 @@ everything the Crop Allocation Model needs.
 ## Run it
 
 ```
-run.bat --impact C:\EPTD\Modeling\f_landuse\OutputFiles\Scenarios\SSP2-MRI-370-379-LUREF.gdx
+run.bat --impact <path to the IMPACT scenario GDX>
 ```
 
 That is the whole pipeline (about 25 s). It stops at the first failed check and says which one.
@@ -27,9 +27,10 @@ run.bat --help
 ```
 
 `--impact` can be omitted if the IMPACT scenario file is copied to `input\impact_scenario.gdx`.
-`run.bat` uses the Python bundled with GAMS 49 (`C:\GAMS\49\GMSPython`), which already has pandas and
-`gams.transfer`. Nothing else needs installing. If GAMS lives elsewhere, edit the one `GAMSDIR` line
-at the top of `run.bat`.
+`--ap` can be omitted if there is exactly one `AP_*.gdx` file in `input\`.
+`run.bat` uses the Python bundled with GAMS 49 (the `GMSPython` folder of the GAMS installation), which
+already has pandas and `gams.transfer`. Nothing else needs installing. The GAMS installation directory is
+the one `GAMSDIR` line at the top of `run.bat`; edit it if GAMS is installed elsewhere than the default.
 
 ## Inputs (`input/`)
 
@@ -40,7 +41,7 @@ and are not in this repository. Only the master grid `PIXEL_TO_DIM.gdx` is track
 |---|---|---|---|
 | `solution_lu.gdx` | LUMEN | **yes, every run** | a LUMEN solution: `pid`, `pid_coords`, `pid_run`, `pid_cty`, `cty_run`, `yrs`, `lu_out` |
 | IMPACT scenario GDX (`--impact`) | IMPACT | **yes, with the LUMEN run** | the scenario LUMEN was driven by (e.g. `SSP2-MRI-370-379-LUREF.gdx`, 200+ MB). Only `AREACTYX0`, `CROPINTENSX0`, `LANDX0`, `YLDCTYX0` are read |
-| `AP_KEN_downscale_for_ABHI.gdx` | AP | **yes, per country** | `PIXEL_TO_DIM` (its own pixels), `p_Area` (**physical** area: SPAM physical area mapped to IMPACT crops, 1000 ha), `p_Production` (1000 t). No harvested layer, no yield |
+| `AP_<cty>_downscale.gdx` (any single `AP_*.gdx`) | AP | **yes, per country** | `PIXEL_TO_DIM` (its own pixels), `p_Area` (**physical** area: SPAM physical area mapped to IMPACT crops, 1000 ha), `p_Production` (1000 t). No harvested layer, no yield |
 | `PIXEL_TO_DIM.gdx` | AP | no, fixed | master 5-arc-min grid: every pixel key → (X, Y) centre, 964,338 pixels |
 
 The IMPACT file must be the one the LUMEN run used: LUMEN's crop control total is IMPACT's `LANDX0`,
@@ -201,7 +202,7 @@ area, their difference and relative difference; `cs_check(cty,JCROP,SYS,·)` doe
 `pid_run`, `lu_cty` and the IMPACT control at the base year, and `land_by_year` the `lu_out` pools by year.
 The tables are echoed to the console, kept in `output/secondary/step4_totals.lst` and unloaded unchanged to
 `output/secondary/<cty>_totals.gdx`; to rerun on its own:
-`C:\GAMS\49\gams.exe src\step4_totals.gms pf=output\secondary\step4_totals.pf`.
+`gams src\step4_totals.gms pf=output\secondary\step4_totals.pf` (with `gams.exe` from the GAMS installation).
 
 **Step 5 — hand-off to the Crop Allocation Model.** `src/step5_handoff.gms` writes the third deliverable,
 `output/<cty>_for_CropAllocation.gdx`: everything the Crop Allocation Model needs from this pipeline in one

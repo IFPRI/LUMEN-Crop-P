@@ -14,7 +14,7 @@
 | file | owner | what it is |
 |---|---|---|
 | `PIXEL_TO_DIM.gdx` | **AP** | 5-arcmin pixel keys → lon/lat |
-| `AP_KEN_downscale_for_ABHI.gdx` | **AP** | Kenya downscaled crop area & production, per 5-arcmin pixel |
+| `AP_KEN_downscale.gdx` | **AP** | Kenya downscaled crop area & production, per 5-arcmin pixel |
 | `solution_lu_KEN.gdx` | **LUMEN** | 0.25° `pid` grid, `pid_coords`, `lu_out` land-use pools |
 
 ## The two grids
@@ -91,7 +91,7 @@ western/southern hemisphere cells shift by one.
 ## Conservation check — audited per pid, not just in total
 
 Aggregation is a plain sum over the ≤9 child pixels, so area and production are conserved.
-`out/audit_conservation.py` re-derives the result from `AP_KEN_downscale_for_ABHI.gdx`
+`out/audit_conservation.py` re-derives the result from `AP_KEN_downscale.gdx`
 alone (using AP's own embedded `PIXEL_TO_DIM`, not the master file the crosswalk was built
 from) and compares against the delivered GDX. **15/15 checks pass:**
 
@@ -157,7 +157,7 @@ year (`impact_base` = "IMPACT 2021 totals", `luh2_base`, `bii_base` "baseline ye
 **AP: unknown — the file carries no year.** `p_Area(*, JCROP, SYS)` and
 `p_Production(*, JCROP, SYS)` are 3-dimensional: pixel × crop × system. There is **no year
 dimension**, no year-like UEL, no set text, and no explanatory text anywhere in
-`AP_KEN_downscale_for_ABHI.gdx`. The GDX audit stamp (15 Jun 2026, GAMS 54.1.0) is the
+`AP_KEN_downscale.gdx`. The GDX audit stamp (15 Jun 2026, GAMS 54.1.0) is the
 file's creation date, not the data vintage.
 
 So the year alignment is **an assumption, not something the data confirms.** 2021 is the

@@ -66,7 +66,8 @@ def run_gams(gams_exe, gms, pf, pf_lines, lst, sec, log, echo_from, step):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--ap", default="input/AP_KEN_downscale_for_ABHI.gdx", help="AP downscale GDX (PIXEL_TO_DIM, p_Area, p_Production)")
+    p.add_argument("--ap", default=None,
+                   help="Crop Allocation Model country GDX (PIXEL_TO_DIM, p_Area, p_Production); default = the single input/AP_*.gdx file")
     p.add_argument("--lu", default="input/solution_lu.gdx", help="LUMEN solution GDX (pid, pid_coords, pid_run, cty_run, lu_out)")
     p.add_argument("--pixel", default="input/PIXEL_TO_DIM.gdx", help="AP master 5-arcmin grid")
     p.add_argument("--impact", default="input/impact_scenario.gdx",
@@ -76,6 +77,12 @@ def main():
     p.add_argument("--fresh", action="store_true", help="delete everything in output/ before running, so no stale file from an earlier run survives")
     a = p.parse_args()
 
+    if a.ap is None:
+        cands = sorted((ROOT / "input").glob("AP_*.gdx"))
+        if len(cands) != 1:
+            print(f"ERROR  : pass --ap: expected exactly one input/AP_*.gdx, found {len(cands)}: {[c.name for c in cands]}")
+            return 2
+        a.ap = str(cands[0])
     gamsdir = pathlib.Path(a.gamsdir) if a.gamsdir else (
         pathlib.Path(sys.executable).parents[1] if pathlib.Path(sys.executable).parent.name == "GMSPython"
         else pathlib.Path(r"C:\GAMS\49"))
