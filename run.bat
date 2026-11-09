@@ -1,5 +1,5 @@
 @echo off
-rem LUMEN-Crop: run the whole pipeline. Any arguments are passed to src\run.py, e.g.
+rem LUMEN-CAM: run the whole pipeline. Any arguments are passed to src\run.py, e.g.
 rem   run.bat --impact C:\EPTD\Modeling\f_landuse\OutputFiles\Scenarios\SSP2-MRI-370-379-LUREF.gdx
 rem   run.bat                                   (if the IMPACT scenario is copied to input\impact_scenario.gdx)
 rem   run.bat --impact <scenario.gdx> --ap input\AP_UGA_downscale.gdx --baseyear 2021

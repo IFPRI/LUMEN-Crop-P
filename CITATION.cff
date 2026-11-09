@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this pipeline, please cite the software and the model documentation below."
 type: software
-title: "LUMEN-Crop: crosswalk and balancing of Crop Allocation Model data to the LUMEN grid and IMPACT crop areas"
+title: "LUMEN-CAM: crosswalk and balancing of Crop Allocation Model data to the LUMEN grid and IMPACT crop areas"
 version: "1.0.0"
 date-released: "2026-11-02"
 license: CC-BY-4.0
@@ -24,7 +24,7 @@ keywords:
   - SPAM
 preferred-citation:
   type: report
-  title: "Land Use Model with Environmental Nexus (LUMEN) and LUMEN-Crop: Model documentation"
+  title: "Land Use Model with Environmental Nexus (LUMEN) and LUMEN-CAM: Model documentation"
   year: 2026
   institution:
     name: "International Food Policy Research Institute (IFPRI)"

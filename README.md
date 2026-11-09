@@ -1,4 +1,4 @@
-# LUMEN-Crop
+# LUMEN-CAM
 
 Puts AP's 5-arc-minute crop downscale onto the LUMEN 0.25° `pid` grid and balances it so that, in the
 base year, three things hold at once:
@@ -278,4 +278,4 @@ balance described here, adds the IMPACT scenario as an input, and renames the de
 
 ## License and citation
 
-Released under the Creative Commons Attribution 4.0 International license (see `LICENSE`). Cite as given in `CITATION.cff`: Mishra & Petsakos et al. (2026), *Land Use Model with Environmental Nexus (LUMEN) and LUMEN-Crop: Model documentation*, IFPRI.
+Released under the Creative Commons Attribution 4.0 International license (see `LICENSE`). Cite as given in `CITATION.cff`: Mishra & Petsakos et al. (2026), *Land Use Model with Environmental Nexus (LUMEN) and LUMEN-CAM: Model documentation*, IFPRI.

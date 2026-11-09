@@ -1,4 +1,4 @@
-"""LUMEN-Crop driver: AP 5-arcmin crop downscale -> LUMEN 0.25-deg pid grid -> balanced to
+"""LUMEN-CAM driver: AP 5-arcmin crop downscale -> LUMEN 0.25-deg pid grid -> balanced to
 lu_out per pid and to IMPACT AREACTYX0 per crop and system.
 
 Usage (from the project root, normally via run.bat):
@@ -101,7 +101,7 @@ def main():
     sec.mkdir(parents=True, exist_ok=True)
     log = Log(sec / "run_log.txt")
     t0 = time.time()
-    log(f"LUMEN-Crop run  {dt.datetime.now():%Y-%m-%d %H:%M}")
+    log(f"LUMEN-CAM run  {dt.datetime.now():%Y-%m-%d %H:%M}")
     if a.fresh:
         log(f"fresh  : removed {n_removed} files from {out}")
         for f in locked:
